@@ -1,12 +1,9 @@
 /*
   Copyright 2017 CHIMPS Lab, Carnegie Mellon University
-
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
-
   http://www.apache.org/licenses/LICENSE-2.0
-
   Unless required by applicable law or agreed to in writing, software
   distributed under the License is distributed on an "AS IS" BASIS,
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -40,9 +37,9 @@ import java.util.Set;
 
 public class GoogleDocsSettingsActivity extends AppCompatActivity {
     public static String TAG = "GoogleDocActivity";
-    Toolbar toolbar;
-    RecyclerView recyclerView;
-    private int BackPressedCount;
+    private Toolbar mToolBar;
+    private RecyclerView recyclerView;
+    private int mBackPressedCount;
     public static IconChangeListener iconChangeListener;
 
     public static void setIconChangeListener(IconChangeListener icl) {
@@ -52,10 +49,10 @@ public class GoogleDocsSettingsActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
 
-        if (BackPressedCount == 0) {
+        if (mBackPressedCount == 0) {
             Toast.makeText(GoogleDocsSettingsActivity.this, "Click again to cancel the change", Toast.LENGTH_SHORT).show();
-            BackPressedCount++;
-        } else if (BackPressedCount == 1) {
+            mBackPressedCount++;
+        } else if (mBackPressedCount == 1) {
             Toast.makeText(GoogleDocsSettingsActivity.this, "Change canceled", Toast.LENGTH_SHORT).show();
             super.onBackPressed();
         }
@@ -72,8 +69,12 @@ public class GoogleDocsSettingsActivity extends AppCompatActivity {
                     Log.e(TAG, "onActivityResult:     get result"+ text);
                     GoogleDocsSettingsActivity.super.onBackPressed();
                 }
-                break;
+
+
             }
+            default:
+
+                break;
         }
 
     }
@@ -89,7 +90,7 @@ public class GoogleDocsSettingsActivity extends AppCompatActivity {
         } catch (PSException e) {
             e.printStackTrace();
         }
-        Contact.InitFlag(this, ContactStorage.STORAGE);
+        Contact.initFlag(this, ContactStorage.KEY_STORAGE);
 
         //Initialize UI
         setContentView(R.layout.activity_contact_select);
@@ -97,14 +98,14 @@ public class GoogleDocsSettingsActivity extends AppCompatActivity {
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
         window.setStatusBarColor(this.getResources().getColor(R.color.colorPrimaryDark));
         //StatusBarCompat.setStatusBarColor(this, getResources().getColor(R.color.colorPrimary), true);
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
-        //toolbar.setNavigationIcon(R.drawable.ic_action_back);
-        toolbar.setTitle("Select Contacts");
-        toolbar.setTitleTextColor(getResources().getColor(R.color.colorwhite));
-        toolbar.setSubtitle(" " + Contact.SelectedItemCount() + " selected");
-        toolbar.setSubtitleTextColor(getResources().getColor(R.color.colorwhite));
-        toolbar.inflateMenu(R.menu.selectall);
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+        mToolBar = (Toolbar) findViewById(R.id.toolbar);
+        //mToolBar.setNavigationIcon(R.drawable.ic_action_back);
+        mToolBar.setTitle("Select Contacts");
+        mToolBar.setTitleTextColor(getResources().getColor(R.color.colorwhite));
+        mToolBar.setSubtitle(" " + Contact.selectedItemCount() + " selected");
+        mToolBar.setSubtitleTextColor(getResources().getColor(R.color.colorwhite));
+        mToolBar.inflateMenu(R.menu.selectall);
+        mToolBar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 //Toast.makeText(getBaseContext(), "Contacts Saved" , Toast.LENGTH_SHORT).show();
@@ -115,7 +116,7 @@ public class GoogleDocsSettingsActivity extends AppCompatActivity {
         setIconChangeListener(new IconChangeListener() {
             public void onChange(Boolean wantChange) {
                 Log.e("test", "Listener recieved");
-                MenuItem i = toolbar.getMenu().getItem(0);
+                MenuItem i = mToolBar.getMenu().getItem(0);
                 if (wantChange) {
                     i.setIcon(getDrawable(R.drawable.ic_delete_sweep_black_24dp));
                 } else {
@@ -124,23 +125,23 @@ public class GoogleDocsSettingsActivity extends AppCompatActivity {
             }
         });
 
-        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+        mToolBar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 int menuItemId = item.getItemId();
                 switch (menuItemId) {
                     case R.id.selectAll:
-                        if (Contact.SelectedItemCount() == Contact.contactList.size()) {
+                        if (Contact.selectedItemCount() == Contact.contactList.size()) {
                             item.setIcon(getDrawable(R.drawable.ic_action_selectall));
-                            ContactAdapter.SetAllSelection(false, recyclerView);
+                            ContactAdapter.setAllSelections(false, recyclerView);
                             Snackbar snackbar = Snackbar
                                     .make(findViewById(R.id.recyclerview), "Deselect All", Snackbar.LENGTH_LONG);
                             snackbar.show();
                         } else {
                             item.setIcon(getDrawable(R.drawable.ic_delete_sweep_black_24dp));
                             Set<String> set = new HashSet<>(Contact.getSavedContactList());
-                            ContactStorage.storeSendUsers(getBaseContext(), set, ContactStorage.ALLSELECTSTORAGE);
-                            ContactAdapter.SetAllSelection(true, recyclerView);
+                            ContactStorage.storeSendUsers(getBaseContext(), set, ContactStorage.KEY_ALL_SELECT_STORAGE);
+                            ContactAdapter.setAllSelections(true, recyclerView);
                             final MenuItem itemP = item;
                             Snackbar undoSnackbar = Snackbar
                                     .make(findViewById(R.id.recyclerview), "Select All", Snackbar.LENGTH_LONG)
@@ -148,22 +149,23 @@ public class GoogleDocsSettingsActivity extends AppCompatActivity {
                                         @Override
                                         public void onClick(View view) {
                                             itemP.setIcon(getDrawable(R.drawable.ic_action_selectall));
-                                            Contact.InitFlag(GoogleDocsSettingsActivity.this, ContactStorage.ALLSELECTSTORAGE);
-                                            ContactAdapter.SetAllSavedSelection(recyclerView);
-                                            toolbar.setSubtitle(" " + Contact.SelectedItemCount() + " selected");
+                                            Contact.initFlag(GoogleDocsSettingsActivity.this, ContactStorage.KEY_ALL_SELECT_STORAGE);
+                                            ContactAdapter.setAllSavedSelections(recyclerView);
+                                            mToolBar.setSubtitle(" " + Contact.selectedItemCount() + " selected");
                                         }
                                     });
 
                             undoSnackbar.show();
                         }
-                        toolbar.setSubtitle(" " + Contact.SelectedItemCount() + " selected");
+                        mToolBar.setSubtitle(" " + Contact.selectedItemCount() + " selected");
                         //Toast.makeText(getBaseContext(), "Select All" , Toast.LENGTH_SHORT).show();
+                        break;
                 }
                 return true;
             }
         });
 
-        ContactAdapter adapter = new ContactAdapter(Contact.contactList, toolbar);
+        ContactAdapter adapter = new ContactAdapter(Contact.contactList, mToolBar);
         recyclerView = (RecyclerView) findViewById(R.id.recyclerview);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
@@ -176,7 +178,7 @@ public class GoogleDocsSettingsActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Set<String> set = new HashSet<>(Contact.getSavedContactList());
-                ContactStorage.storeSendUsers(GoogleDocsSettingsActivity.this, set, ContactStorage.STORAGE);
+                ContactStorage.storeSendUsers(GoogleDocsSettingsActivity.this, set, ContactStorage.KEY_STORAGE);
                 Toast.makeText(GoogleDocsSettingsActivity.this, "Contacts saved", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent("edu.cmu.chimps.googledocsplugin.sendcontacts");
                 intent.addCategory("sendcontacts");
@@ -185,10 +187,12 @@ public class GoogleDocsSettingsActivity extends AppCompatActivity {
                 intent.putExtra("contacts", bundle);
                 sendBroadcast(intent);
 
+                /*
                 Intent sugiliteIntent = new Intent("edu.cmu.hcii.sugilite.COMMUNICATION");
                 sugiliteIntent.addCategory("android.intent.category.DEFAULT");
                 sugiliteIntent.putExtra("messageType", "GET_SCRIPT_LIST");
                 startActivityForResult(sugiliteIntent, 1);
+                */
             }
         });
 

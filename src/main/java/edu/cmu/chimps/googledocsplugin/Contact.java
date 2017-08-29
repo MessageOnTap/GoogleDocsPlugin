@@ -1,12 +1,9 @@
 /*
   Copyright 2017 CHIMPS Lab, Carnegie Mellon University
-
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
-
   http://www.apache.org/licenses/LICENSE-2.0
-
   Unless required by applicable law or agreed to in writing, software
   distributed under the License is distributed on an "AS IS" BASIS,
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,50 +28,50 @@ import java.util.Set;
 
 
 public class Contact {
-    private String Name;
-    private boolean isFlag;
+    private String mName;
+    private boolean mIsFlag;
     public static ArrayList<Contact> contactList =  new ArrayList<>();
 
     public Contact(String Name){
-        this.Name = Name;
+        this.mName = Name;
     }
 
     public String getName() {
-        return Name;
+        return mName;
     }
 
     public boolean isFlag(){
-        return isFlag;
+        return mIsFlag;
     }
 
     public void setFlag(boolean flag){
-        isFlag = flag;
+        mIsFlag = flag;
     }
 
     public static ArrayList<Contact> getWhatsAppContacts(Context context) throws PSException {
 
         UQI uqi = new UQI(context);
-        ArrayList<Contact> result = new ArrayList<>();
-        List<Item> whatsAppC= uqi.getData(com.github.privacystreams.communication.Contact.getWhatAppAll(), Purpose.UTILITY("get whatsapp contacts"))
+        ArrayList<Contact> results = new ArrayList<>();
+        List<Item> whatsAppContactList= uqi.getData(com.github.privacystreams.communication.Contact.getWhatAppAll(), Purpose.UTILITY("get whatsapp contacts"))
                 .asList();
-        for(int i = 0; i < whatsAppC.size();i++){
-            Contact contact = new Contact(whatsAppC.get(i).getValueByField(com.github.privacystreams.communication.Contact.NAME)
+        for(int i = 0; i < whatsAppContactList.size();i++){
+            Contact contact = new Contact(whatsAppContactList.get(i).getValueByField(com.github.privacystreams.communication.Contact.NAME)
                     .toString());
-            result.add(i, contact);
+            results.add(i, contact);
 
         }
-        return result;
+        return results;
     }
 
-    public char getFirstC(){
-        return this.Name.charAt(0);
+    public char getFirstContact(){
+        return this.mName.charAt(0);
     }
     public TextDrawable getContactPicture(){
         return TextDrawable.builder()
-                .buildRound(String.valueOf(getFirstC()), Color.GRAY);
+                .buildRound(String.valueOf(getFirstContact()), Color.GRAY);
     }
 
-    public static int SelectedItemCount(){
+    public static int selectedItemCount(){
         int count = 0;
         for (int i=0; i<contactList.size(); i++){
             if (contactList.get(i).isFlag()){
@@ -84,7 +81,7 @@ public class Contact {
         return count;
     }
 
-    public  static void SetAllFlag(Boolean flag){
+    public static void setAllFlags(Boolean flag){
         for (int i = 0; i < contactList.size(); i++) {
             contactList.get(i).setFlag(flag);
         }
@@ -108,9 +105,9 @@ public class Contact {
         return savedContactList;
     }
 
-    public static void InitFlag(Context context, String filename){
+    public static void initFlag(Context context, String filename){
         Set<String> set = ContactStorage.getContacts(context, filename);
-        SetAllFlag(false);
+        setAllFlags(false);
         if (set.size() != 0){
             for (String str: set){
                 for (Contact contact: Contact.contactList){

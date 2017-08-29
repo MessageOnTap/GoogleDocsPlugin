@@ -1,12 +1,9 @@
 /*
   Copyright 2017 CHIMPS Lab, Carnegie Mellon University
-
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
-
   http://www.apache.org/licenses/LICENSE-2.0
-
   Unless required by applicable law or agreed to in writing, software
   distributed under the License is distributed on an "AS IS" BASIS,
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,7 +27,7 @@ import android.widget.TextView;
 import java.util.List;
 import java.util.Set;
 
-import static edu.cmu.chimps.googledocsplugin.Contact.SelectedItemCount;
+import static edu.cmu.chimps.googledocsplugin.Contact.selectedItemCount;
 import static edu.cmu.chimps.googledocsplugin.Contact.contactList;
 import static edu.cmu.chimps.googledocsplugin.Contact.toggleFlag;
 
@@ -39,11 +36,11 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
     protected Toolbar mToolbar;
 
     static class ViewHolder extends RecyclerView.ViewHolder{
-        View contactView;
-        ImageView contactImage;
-        TextView contactName;
-        LinearLayout contactLayout;
-        CheckBox contactCheckBox;
+        private View contactView;
+        private ImageView contactImage;
+        private TextView contactName;
+        private LinearLayout contactLayout;
+        private CheckBox contactCheckBox;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -69,20 +66,20 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
             @Override
             public void onClick(View view) {
                 int position = holder.getAdapterPosition();
-                if (SelectedItemCount()==contactList.size()){
+                if (selectedItemCount()==contactList.size()){
                     GoogleDocsSettingsActivity.iconChangeListener.onChange(false);
                 }
                 Contact contact = mContactList.get(position);
                 toggleFlag(contact);
-                String title = " " + SelectedItemCount() + " selected";
+                String title = " " + selectedItemCount() + " selected";
                 mToolbar.setSubtitle(title);
-                if (SelectedItemCount()== contactList.size()){
+                if (selectedItemCount()== contactList.size()){
                     Log.e("Test", "Listener sent");
                     GoogleDocsSettingsActivity.iconChangeListener.onChange(true);
                 }
 
 
-                SetSelection(holder, contact);
+                setSelection(holder, contact);
                 //Toast.makeText(view.getContext(), "click " + "position:"+position, Toast.LENGTH_SHORT).show();
             }
         });
@@ -94,7 +91,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
         Contact contact = mContactList.get(position);
         holder.contactImage.setImageDrawable(contact.getContactPicture());
         holder.contactName.setText(contact.getName());
-        SetSelection(holder, contact);
+        setSelection(holder, contact);
     }
 
     @Override
@@ -103,7 +100,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
     }
 
 
-    public  static void SetSelection(ViewHolder holder, Contact contact){
+    public  static void setSelection(ViewHolder holder, Contact contact){
         if (contact.isFlag()){
             holder.contactLayout.setSelected(true);
             holder.contactCheckBox.setChecked(true);
@@ -113,37 +110,32 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
         }
     }
 
-    public static void SetAllSelection(Boolean selection, RecyclerView recyclerView){
+    public static void setAllSelections(Boolean selection, RecyclerView recyclerView){
         for (int i = 0; i < recyclerView.getChildCount(); i++) {
             ViewHolder holder = (ViewHolder) recyclerView.findViewHolderForAdapterPosition(i);
-            Contact.SetAllFlag(selection);
+            Contact.setAllFlags(selection);
             holder.contactLayout.setSelected(selection);
             holder.contactCheckBox.setChecked(selection);
-            Log.i("iiii", "SetAllSelection: ");
         }
     }
     
-    public static void SetAllSavedSelection(RecyclerView recyclerView){
-        Set<String> set = ContactStorage.getContacts(GoogleDocApplication.getAppContext(), ContactStorage.ALLSELECTSTORAGE);
+    public static void setAllSavedSelections(RecyclerView recyclerView){
+        Set<String> set = ContactStorage.getContacts(GoogleDocApplication.getAppContext(), ContactStorage.KEY_ALL_SELECT_STORAGE);
         for (int i = 0; i < recyclerView.getChildCount(); i++) {
             ViewHolder holder = (ViewHolder) recyclerView.findViewHolderForAdapterPosition(i);
             holder.contactLayout.setSelected(false);
             holder.contactCheckBox.setChecked(false);
         }
-        Log.i("iiii", "SetAllSavedSelection: enter");
-        if (set.size() == 0){
-            SetAllSelection(false,recyclerView);
+        if (set.isEmpty()){
+            setAllSelections(false,recyclerView);
         } else{
             for (String str: set) {
-                Log.i("iiii", "SetAllSavedSelection:111 ");
                 for (int i = 0; i < recyclerView.getChildCount(); i++) {
                     ViewHolder holder = (ViewHolder) recyclerView.findViewHolderForAdapterPosition(i);
-                    Log.i("iiii", "SetAllSavedSelection: "+holder.contactName.getText());
                     if (str.equals(holder.contactName.getText())){
                         holder.contactLayout.setSelected(true);
                         holder.contactCheckBox.setChecked(true);
                     }
-                    Log.i("iiii", "SetAllSelection:  completed");
                 }
             }
         }
