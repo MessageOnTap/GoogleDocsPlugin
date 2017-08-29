@@ -52,7 +52,10 @@ dependencies {
     compile 'com.android.support:design:26.0.1'
     compile 'com.amulyakhare:com.amulyakhare.textdrawable:1.0.1'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
-    compile 'messageontap:api:0.3.4'
+    compile ('messageontap:api:1.0.0-nightly-7') {
+        exclude group: 'org.apache.httpcomponents'
+        exclude group: 'org.json'
+    }
     testCompile 'junit:junit:4.12'
 }
 
